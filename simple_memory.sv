@@ -74,8 +74,8 @@ module simple_memory #(
     assign axi_araddr_internal = s_axi_araddr[ADDR_WIDTH+ADDR_LSB-1:ADDR_LSB];
 
     // State machine
-    always_ff @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
+    always_ff @(posedge clk or posedge rst_n) begin
+        if (rst_n) begin
             PS <= IDLE;
         end
         else begin
@@ -89,7 +89,7 @@ module simple_memory #(
 
         case (PS)
             IDLE: begin
-                if (s_axi_awvalid && s_axi_wvalid) begin
+                if (s_axi_awvalid) begin  //  if (s_axi_awvalid && s_axi_wvalid)
                     NS = WRITE_DATA;
                 end
                 else if (s_axi_arvalid) begin
@@ -120,8 +120,8 @@ module simple_memory #(
     end
 
     // Control signals
-    always_ff @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
+    always_ff @(posedge clk or posedge rst_n) begin
+        if (rst_n) begin
             s_axi_awready <= 1'b0;
             s_axi_wready <= 1'b0;
             s_axi_bvalid <= 1'b0;

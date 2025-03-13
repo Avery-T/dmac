@@ -1,3 +1,24 @@
+`timescale 1ns / 1ps
+//////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: 
+// 
+// Create Date: 03/06/2025 06:43:04 PM
+// Design Name: 
+// Module Name: dmac
+// Project Name: 
+// Target Devices: 
+// Tool Versions: 
+// Description: 
+// 
+// Dependencies: 
+// 
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+// 
+//////////////////////////////////////////////////////////////////////////////////
+
 module simple_dma_axi4lite (
     input  logic        aclk,
     input  logic        aresetn,
@@ -28,8 +49,8 @@ module simple_dma_axi4lite (
     // AXI4-Lite Data Interface
     output logic [31:0] m_axi_araddr,
     output logic        m_axi_arvalid,
-    input  logic        m_axi_arready,
-    input  logic [31:0] m_axi_rdata,
+    input  logic        m_axi_arready, 
+    input  logic [31:0] m_axi_rdata, 
     input  logic [1:0]  m_axi_rresp,
     input  logic        m_axi_rvalid,
     output logic        m_axi_rready,
@@ -58,19 +79,20 @@ module simple_dma_axi4lite (
     logic start_pulse;
 
     // Configuration registers
-    always_ff @(posedge aclk or negedge aresetn) begin
-        if (!aresetn) begin
+    always_ff @(posedge aclk or posedge aresetn) begin
+        if (aresetn) begin
             src_addr <= '0;
             dst_addr <= '0;
             transfer_len <= '0;
             start_pulse <= '0;
         end
         else if (s_axi_awvalid && s_axi_wvalid) begin
-            case (s_axi_awaddr[7:0])
-                8'h00: src_addr <= s_axi_wdata;
-                8'h04: dst_addr <= s_axi_wdata;
-                8'h08: transfer_len <= s_axi_wdata[15:0];
-                8'h0C: start_pulse <= s_axi_wdata[0];
+            //its up to the salve to determin what the write address means
+            case (s_axi_awaddr)
+                32'h00: src_addr <= s_axi_wdata; //might need to look into this
+                32'h04: dst_addr <= s_axi_wdata;
+                32'h08: transfer_len <= s_axi_wdata[15:0];
+                32'h0C: start_pulse <= s_axi_wdata[0];
                 default: begin end
             endcase
         end
@@ -79,11 +101,11 @@ module simple_dma_axi4lite (
     // Status readback
     always_comb begin
         s_axi_rdata = '0;
-        case (s_axi_araddr[7:0])
-            8'h00: s_axi_rdata = src_addr;
-            8'h04: s_axi_rdata = dst_addr;
-            8'h08: s_axi_rdata = transfer_len;
-            8'h0C: s_axi_rdata = {31'b0, (state != IDLE)};
+        case (s_axi_araddr) // 32 bit addressing makes it simplier to read 
+            32'h00: s_axi_rdata = src_addr;
+            32'h04: s_axi_rdata = dst_addr;
+            32'h08: s_axi_rdata = transfer_len;
+            32'h0C: s_axi_rdata = {31'b0, (state != IDLE)};
             default: begin end
         endcase
     end
@@ -99,8 +121,8 @@ module simple_dma_axi4lite (
     assign s_axi_rvalid = s_axi_arvalid;
 
     // DMA Control FSM
-    always_ff @(posedge aclk or negedge aresetn) begin
-        if (!aresetn) begin
+    always_ff @(posedge aclk or posedge aresetn) begin
+        if (aresetn) begin
             state <= IDLE;
             remaining <= '0;
             data_buffer <= '0;

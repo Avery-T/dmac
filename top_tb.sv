@@ -66,7 +66,7 @@ module top_tb(
     
  initial begin 
    aresetn =1; 
-   #30
+   #20
    
    aresetn = 0;
    
@@ -75,34 +75,33 @@ module top_tb(
    dma_s_axi_awaddr = 32'h0; //driven by master 00 is soruce
    dma_s_axi_awvalid =1;
    dma_s_axi_wvalid = 1;
-   dma_s_axi_wdata = 32'h00008; //0 is the source address
-   #50 //axi make you wait for ready but i dont want to do it
+   dma_s_axi_wdata = 32'h00002; //CPAR
+   #20 //axi make you wait for ready but i dont want to do it
    
    //Dest address
    dma_s_axi_awaddr = 32'h4; 
    dma_s_axi_awvalid =1;
    dma_s_axi_wvalid = 1;
-   dma_s_axi_wdata = 32'h00ff; //0 is dest addr
-   #40 //axi make you wait for ready but i dont want to do it
+   dma_s_axi_wdata = 32'h0000; //CMAR
+   #20 //axi make you wait for ready but i dont want to do it
    //transfer length 
    dma_s_axi_awaddr = 32'h8; 
    dma_s_axi_awvalid =1;
    dma_s_axi_wvalid = 1;
-   dma_s_axi_wdata = 32'h00ff; //0 is dest addr
+   dma_s_axi_wdata = 32'h0005; //CNDTR
    
    //start pulse
-   #40 //axi make you wait for ready but i dont want to do it
+   #20 //axi make you wait for ready but i dont want to do it
    dma_s_axi_awaddr = 32'hC; 
    dma_s_axi_awvalid =1;
    dma_s_axi_wvalid = 1;
-   dma_s_axi_wdata = 32'h0001; //0 is dest addr
-   
-  
-   #40
+   dma_s_axi_wdata = 32'h0001; //start signal CCR->EN
+   #20
    /*** Giving the DMA data ***/ 
    dma_m_axi_rvalid = 1; 
    dma_m_axi_arready = 1;
    dma_m_axi_rdata = 32'hDEAD;  
+   dma_s_axi_wdata = 32'h0000; //0 turn off start pulse
    
  
  end

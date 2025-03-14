@@ -25,10 +25,10 @@ module simple_memory #(
     parameter integer DATA_WIDTH = 32   // Data width in bits
 )(
     input logic clk,
-    input logic rst_n,  // Active low reset
+    input logic rst_n,
 
     // AXI4-Lite Configuration Interface
-    input logic [31:0] s_axi_awaddr,
+    input logic [31:0] s_axi_awaddr, 
     input logic s_axi_awvalid,
     output logic s_axi_awready,
     input logic [31:0] s_axi_wdata,
@@ -50,7 +50,7 @@ module simple_memory #(
 
     // Local parameters
     localparam integer ADDR_LSB = $clog2(DATA_WIDTH/8);
-    localparam integer MEM_DEPTH = 2**ADDR_WIDTH;
+    localparam integer MEM_DEPTH = 2**10;
 
     // Memory array
     logic [DATA_WIDTH-1:0] mem [0:MEM_DEPTH-1];
@@ -70,9 +70,9 @@ module simple_memory #(
     axi_state_t PS, NS;
 
     // Convert AXI address to internal memory address
-    assign axi_awaddr_internal = s_axi_awaddr[ADDR_WIDTH+ADDR_LSB-1:ADDR_LSB];
-    assign axi_araddr_internal = s_axi_araddr[ADDR_WIDTH+ADDR_LSB-1:ADDR_LSB];
-
+    //assign axi_awaddr_internal = s_axi_awaddr[ADDR_WIDTH+1-1:ADDR_LSB];
+    //assign axi_araddr_internal = s_axi_araddr[ADDR_WIDTH+ADDR_LSB-1:ADDR_LSB];
+    assign axi_awaddr_internal = s_axi_awaddr[ADDR_WIDTH-1:0];; 
     // State machine
     always_ff @(posedge clk or posedge rst_n) begin
         if (rst_n) begin
